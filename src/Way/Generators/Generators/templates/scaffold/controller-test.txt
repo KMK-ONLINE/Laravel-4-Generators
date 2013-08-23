@@ -1,123 +1,117 @@
 <?php
 
-use Mockery as m;
-use Way\Tests\Factory;
+use Woodling\Woodling;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class {{className}} extends TestCase {
+class {{className}} extends ControllerTest {
 
-	public function __construct()
-	{
-		$this->mock = m::mock('Eloquent', '{{Model}}');
-		$this->collection = m::mock('Illuminate\Database\Eloquent\Collection')->shouldDeferMissing();
+  use Codeception\Specify;
+
+	public function testIndex() {
+    $path = URL::action('{{Models}}Controller@index', [], false);
+
+    $this->specify("it renders the view", function() use($path) {
+      $response = $this->get($path);
+      $this->assertResponseOk();
+      $this->assertViewHas('{{models}}');
+      $this->assertContains('table', $response->getContent());
+    });
 	}
 
-	public function setUp()
-	{
-		parent::setUp();
+	public function testCreate() {
+    $path = URL::action('{{Models}}Controller@create', [], false);
 
-		$this->attributes = Factory::{{model}}(['id' => 1]);
-		$this->app->instance('{{Model}}', $this->mock);
+    $this->specify("renders the view", function() use($path) {
+      $response = $this->get($path);
+      $this->assertResponseOk();
+      $this->assertViewHas('{{model}}');
+      $this->assertContains('form', $response->getContent());
+    });
 	}
 
-	public function tearDown()
-	{
-		m::close();
+	public function testStore() {
+    $path = URL::action('{{Models}}Controller@store', [], false);
+
+    $this->specify("when valid, it persists the {{model}} and redirects", function() use($path) {
+      ${{model}} = Woodling::retrieve('{{Model}}');
+      $validInputs = array_except(${{model}}->getAttributes(), ['updated_at', 'created_at']);
+
+      $response = $this->post($path, $validInputs);
+		  $this->assertRedirectedToRoute('{{models}}.show', ['{{models}}' => {{Model}}::last()->id]);
+    });
+
+    $this->specify("when invalid, it flashes errors and redirects", function() use($path) {
+      $invalidInputs = [];
+
+      $response = $this->post($path, $invalidInputs);
+      $this->assertRedirectedToRoute('{{models}}.create');
+      $this->assertSessionHasErrors();
+      $this->assertSessionHas('message');
+    });
 	}
 
-	public function testIndex()
-	{
-		$this->mock->shouldReceive('all')->once()->andReturn($this->collection);
-		$this->call('GET', '{{models}}');
+	public function testShow() {
+    ${{model}} = Woodling::saved('{{Model}}');
+    $path = URL::action('{{Models}}Controller@show', ['{{models}}' => ${{model}}->id], false);
 
-		$this->assertViewHas('{{models}}');
+    $this->specify("renders the view", function() use($path, ${{model}}) {
+      $response = $this->get($path);
+      $this->assertResponseOk();
+      $this->assertViewHas('{{model}}');
+      $this->assertContains('table', $response->getContent());
+    });
+
+    $this->specify("when not found, throws an exception", function() use($path, ${{model}}) {
+      ${{model}}Mock = Mockery::mock('Vertical')->makePartial();
+      ${{model}}Mock->shouldReceive('findOrFail')->andThrow(new ModelNotFoundException);
+      App::instance('{{Model}}', ${{model}}Mock);
+
+      $this->setExpectedException('Illuminate\Database\Eloquent\ModelNotFoundException');
+      $response = $this->get($path);
+    });
+  }
+
+	public function testEdit() {
+    ${{model}} = Woodling::saved('{{Model}}');
+    $path = URL::action('{{Models}}Controller@edit', ['{{models}}' => ${{model}}->id], false);
+
+    $this->specify("renders the view", function() use(${{model}}, $path) {
+      $response = $this->get($path);
+      $this->assertResponseOk();
+      $this->assertViewHas('{{model}}');
+      $this->assertContains('form', $response->getContent());
+    });
 	}
 
-	public function testCreate()
-	{
-		$this->call('GET', '{{models}}/create');
+	public function testUpdate() {
+    ${{model}} = Woodling::saved('{{Model}}');
+    $path = URL::action('{{Models}}Controller@update', ['{{models}}' => ${{model}}->id], false);
 
-		$this->assertResponseOk();
+    $this->specify("when valid, it persists the {{model}} and redirects", function() use($path, ${{model}}) {
+      $validInputs = array_except(${{model}}->getAttributes(), ['updated_at', 'created_at']);
+      
+      $response = $this->put($path, $validInputs);
+      $this->assertRedirectedToRoute('{{models}}.show', ['{{models}}' => ${{model}}->id]);
+    });
+
+    $this->specify("when invalid, it flashes errors and redirects", function() use($path, ${{model}}) {
+      $invalidInputs = [];
+
+      $response = $this->put($path, $invalidInputs);
+      $this->assertRedirectedToRoute('{{models}}.edit', ['{{models}}' => ${{model}}->id]);
+      $this->assertSessionHasErrors();
+      $this->assertSessionHas('message');
+    });
 	}
 
-	public function testStore()
-	{
-		$this->mock->shouldReceive('create')->once();
-		$this->validate(true);
-		$this->call('POST', '{{models}}');
+	public function testDestroy() {
+    ${{model}} = Woodling::saved('{{Model}}');
+    $path = URL::action('{{Models}}Controller@destroy', ['{{models}}' => ${{model}}->id], false);
 
-		$this->assertRedirectedToRoute('{{models}}.index');
+    $this->specify("calls delete on the {{model}}", function() use($path, ${{model}}) {
+      $response = $this->delete($path);
+      $this->assertRedirectedToRoute('{{models}}.index');
+    });
 	}
 
-	public function testStoreFails()
-	{
-		$this->mock->shouldReceive('create')->once();
-		$this->validate(false);
-		$this->call('POST', '{{models}}');
-
-		$this->assertRedirectedToRoute('{{models}}.create');
-		$this->assertSessionHasErrors();
-		$this->assertSessionHas('message');
-	}
-
-	public function testShow()
-	{
-		$this->mock->shouldReceive('findOrFail')
-				   ->with(1)
-				   ->once()
-				   ->andReturn($this->attributes);
-
-		$this->call('GET', '{{models}}/1');
-
-		$this->assertViewHas('{{model}}');
-	}
-
-	public function testEdit()
-	{
-		$this->collection->id = 1;
-		$this->mock->shouldReceive('find')
-				   ->with(1)
-				   ->once()
-				   ->andReturn($this->collection);
-
-		$this->call('GET', '{{models}}/1/edit');
-
-		$this->assertViewHas('{{model}}');
-	}
-
-	public function testUpdate()
-	{
-		$this->mock->shouldReceive('find')
-				   ->with(1)
-				   ->andReturn(m::mock(['update' => true]));
-
-		$this->validate(true);
-		$this->call('PATCH', '{{models}}/1');
-
-		$this->assertRedirectedTo('{{models}}/1');
-	}
-
-	public function testUpdateFails()
-	{
-		$this->mock->shouldReceive('find')->with(1)->andReturn(m::mock(['update' => true]));
-		$this->validate(false);
-		$this->call('PATCH', '{{models}}/1');
-
-		$this->assertRedirectedTo('{{models}}/1/edit');
-		$this->assertSessionHasErrors();
-		$this->assertSessionHas('message');
-	}
-
-	public function testDestroy()
-	{
-		$this->mock->shouldReceive('find')->with(1)->andReturn(m::mock(['delete' => true]));
-
-		$this->call('DELETE', '{{models}}/1');
-	}
-
-	protected function validate($bool)
-	{
-		Validator::shouldReceive('make')
-				->once()
-				->andReturn(m::mock(['passes' => $bool]));
-	}
 }

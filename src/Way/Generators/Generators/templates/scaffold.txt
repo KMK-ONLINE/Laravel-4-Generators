@@ -1,14 +1,23 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-	</head>
+<!DOCTYPE html>
+<html lang='en'>
+<head>
 
-	<body>
+  <meta charset='utf-8'>
+  <meta content='width=device-width, initial-scale=1.0' name='viewport'>
 
-		<div class="container">
-		</div>
+</head>
+<body>
 
-	</body>
+  <div id="container">
+    <header class="main">
+    </header>
 
+    <article class="main">
+    </article>
+
+    <footer class="main">
+    </footer>
+  </div>
+
+</body>
 </html>

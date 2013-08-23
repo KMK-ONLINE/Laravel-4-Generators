@@ -1,7 +1,11 @@
 <?php
 
 class {{className}} extends Eloquent {
-	protected $guarded = array();
+  use Queryable;
+  use Validatable;
 
-	public static $rules = array({{rules}});
+	public static $rules = [{{rules}}];
+
+  protected $guarded = [];
+
 }

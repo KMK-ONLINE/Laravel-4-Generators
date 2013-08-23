@@ -1,10 +1,15 @@
 <?php
 
-class {{className}} extends TestCase {
+class {{className}} extends \Codeception\TestCase\Test {
 
-	public function test()
-	{
+  use Codeception\Specify;
 
+  protected function _before() {
+
+  }
+
+	public function testSomething() {
+    $this->assertTrue(true);
 	}
 
 }
