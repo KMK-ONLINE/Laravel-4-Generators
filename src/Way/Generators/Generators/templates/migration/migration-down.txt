@@ -1,6 +1,5 @@
-	public function down()
-	{
-		Schema::table('{{tableName}}', function(Blueprint $table) {
-			{{methods}}
-		});
-	}
+  public function down() {
+    Schema::table('{{tableName}}', function(Blueprint $table) {
+      {{methods}}
+    });
+  }

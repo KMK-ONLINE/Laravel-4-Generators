@@ -1,11 +1,10 @@
 
 {{{formOpen}}}
-	<ul>
+  <ul>
 {{{formElements}}}
-
-		<li>
-			{{=<% %>=}}
-			{{ Form::submit() }}
-		</li>
-	</ul>
+    <li>
+      {{=<% %>=}}
+      {{ Form::submit() }}
+    </li>
+  </ul>
 {{ Form::close() }}

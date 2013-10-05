@@ -2,10 +2,12 @@
 
 use Woodling\Woodling;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use ControllerTest;
+use URL;
+use Mockery;
+use App;
 
 class {{className}} extends ControllerTest {
-
-  use Codeception\Specify;
 
 	public function testIndex() {
     $path = URL::action('{{Models}}Controller@index', [], false);
@@ -62,7 +64,7 @@ class {{className}} extends ControllerTest {
     });
 
     $this->specify("when not found, throws an exception", function() use($path, ${{model}}) {
-      ${{model}}Mock = Mockery::mock('Vertical')->makePartial();
+      ${{model}}Mock = Mockery::mock('{{Model}}')->makePartial();
       ${{model}}Mock->shouldReceive('findOrFail')->andThrow(new ModelNotFoundException);
       App::instance('{{Model}}', ${{model}}Mock);
 

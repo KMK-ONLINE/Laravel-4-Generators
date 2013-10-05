@@ -1,4 +1,3 @@
-	public function down()
-	{
-		Schema::drop('{{tableName}}');
-	}
+  public function down() {
+    Schema::drop('{{tableName}}');
+  }

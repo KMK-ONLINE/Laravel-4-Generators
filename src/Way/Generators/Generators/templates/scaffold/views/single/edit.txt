@@ -1,6 +1,7 @@
 @section('main')
 
 <h1>Edit {{Model}}</h1>
+
 {{ Form::model(${{model}}, array('method' => 'PATCH', 'route' => array('{{models}}.update', ${{model}}->id))) }}
 	<ul>
 {{formElements}}
